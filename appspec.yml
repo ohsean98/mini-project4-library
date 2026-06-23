@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /walking-library/dist
+    destination: /var/www/test-angular-project
+hooks:
+  AfterInstall:
+    - location: scripts/change_permissions.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: scripts/restart_nginx.sh
+      timeout: 300
+      runas: root
