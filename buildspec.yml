@@ -4,17 +4,15 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
-    commands: # <- 이 부분을 추가하고 아래 명령어들의 들여쓰기를 맞췄습니다.
-      - cd walking-library
+    commands:
       - echo Installing source dependencies...
       - npm install
   build:
     commands:
-      - cd walking-library
       - echo Build started on `date`
       - echo Building the React application...
       - npm run build
 artifacts:
   files:
     - '**/*'
-  base-directory: walking-library/dist
+  base-directory: dist
