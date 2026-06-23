@@ -6,13 +6,17 @@ phases:
       nodejs: 18
     commands:
       - echo Installing source dependencies...
+      - cd walking-library # package.json이 있는 폴더로 이동
       - npm install
   build:
     commands:
       - echo Build started on `date`
       - echo Building the React application...
+      - cd walking-library # build 단계에서도 폴더 이동 필요
       - npm run build
+
 artifacts:
   files:
     - '**/*'
-  base-directory: dist
+  # 빌드 결과물(dist)이 walking-library 폴더 내부에 생성되므로 경로 지정
+  base-directory: walking-library/dist
