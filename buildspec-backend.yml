@@ -6,34 +6,30 @@ phases:
       java: corretto17
   pre_build:
     commands:
-      # 1. 백엔드 폴더(bookapp) 내부로 이동하여 실행 권한 부여
-      - cd bookapp
-      - chmod +x ./gradlew
-      - cd ..
+      - echo "Granting execute permission to gradlew inside bookapp..."
+      - chmod +x $CODEBUILD_SRC_DIR/bookapp/gradlew
   build:
     commands:
-      - echo Backend build started on `date`
-      # 2. bookapp 폴더 안으로 진입해서 빌드 수행
-      - cd bookapp
+      - echo "Moving to bookapp and starting build..."
+      - cd $CODEBUILD_SRC_DIR/bookapp
       - ./gradlew clean build -x test
-      - cd ..
   post_build:
     commands:
-      - echo Creating clean deployment package...
-      # 3. 배포에 필요한 것만 모을 가상 폴더(deploy-package) 생성
-      - mkdir -p deploy-package/scripts
+      - echo "Creating clean deployment package using absolute paths..."
+      # 1. 아티팩트로 내보낼 패키지 폴더 세팅
+      - mkdir -p $CODEBUILD_SRC_DIR/deploy-package/scripts
       
-      # 4. bookapp 내부에서 빌드된 jar 파일을 배포 폴더로 복사
-      - cp bookapp/build/libs/*.jar deploy-package/
+      # 2. 빌드 완료된 jar 파일을 패키지 폴더로 복사
+      - cp $CODEBUILD_SRC_DIR/bookapp/build/libs/*.jar $CODEBUILD_SRC_DIR/deploy-package/
       
-      # 5. 최상단에 있는 appspec-backend.yml을 'appspec.yml' 이름으로 바꾸어 배포 폴더로 복사
-      - cp appspec-backend.yml deploy-package/appspec.yml
+      # 3. 최상위에 있는 appspec-backend.yml을 appspec.yml로 이름을 변경해 패키지 폴더 루트에 저장
+      - cp $CODEBUILD_SRC_DIR/appspec-backend.yml $CODEBUILD_SRC_DIR/deploy-package/appspec.yml
       
-      # 6. 최상단의 deploy-scripts 내부 스크립트들을 배포 폴더 안의 scripts 폴더로 복사
-      - cp -r deploy-scripts/* deploy-package/scripts/ || true
+      # 4. 최상위에 있는 deploy-scripts 폴더의 모든 sh 스크립트들을 패키지 폴더의 scripts 내부로 복사
+      - cp -r $CODEBUILD_SRC_DIR/deploy-scripts/* $CODEBUILD_SRC_DIR/deploy-package/scripts/ || true
 
 artifacts:
   files:
     - '**/*'
-  # deploy-package 폴더 안의 구조를 그대로 유지한 채 이 폴더 내부를 루트 삼아 압축합니다.
+  # 🌟 중요: deploy-package를 베이스 디렉토리로 잡아야 압축 파일 해제 시 루트에 appspec.yml이 바로 노출됩니다.
   base-directory: deploy-package
