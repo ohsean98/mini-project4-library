@@ -9,16 +9,25 @@ phases:
       - chmod +x ./gradlew
   build:
     commands:
+      - echo Backend build started on `date`
       - ./gradlew clean build -x test
   post_build:
     commands:
-      - echo Copying deployment configuration files...
-      - cp appspec-backend.yml appspec.yml
-      - cp -r deploy-scripts scripts || true
+      - echo Creating clean deployment package...
+      # 1. 배포에 필요한 것만 모을 폴더 생성
+      mkdir -p deploy-package/scripts
+      
+      # 2. 빌드된 jar 파일을 배포 폴더로 복사
+      cp build/libs/*.jar deploy-package/
+      
+      # 3. appspec-backend.yml을 appspec.yml 이름으로 변경하여 배포 폴더로 복사
+      cp appspec-backend.yml deploy-package/appspec.yml
+      
+      # 4. deploy-scripts 안에 있는 쉘 스크립트들을 배포 폴더 안의 scripts 폴더로 복사
+      cp -r deploy-scripts/* deploy-package/scripts/ || true
 
 artifacts:
   files:
-    - 'build/libs/*.jar'     # jar 파일 경로 유지
-    - 'appspec.yml'          # 복사된 appspec.yml을 확실하게 포함
-    - 'scripts/**/*'         # 복사된 scripts 폴더 전체 포함
-  discard-paths: yes         # 모든 파일들을 최상위 루트에 모아서 압축
+    - '**/*'
+  # 🌟 중요: deploy-package 내부의 구조를 그대로 유지한 채 이 폴더를 루트 삼아 압축합니다.
+  base-directory: deploy-package
