@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+  pre_build:
+    commands:
+      - chmod +x ./gradlew
+  build:
+    commands:
+      - ./gradlew clean build -x test
+  post_build:
+    commands:
+      - echo Copying deployment configuration files...
+      - cp appspec-backend.yml appspec.yml
+      # deploy-scripts 폴더가 복사되면서 내부의 application-start-hook.sh도 함께 이동합니다.
+      - cp -r deploy-scripts scripts || true
+
+artifacts:
+  files:
+    - '*.jar'         # discard-paths: yes로 인해 파일명만 찾으면 됩니다
+    - appspec.yml
+    - scripts/**/*
+  discard-paths: yes
