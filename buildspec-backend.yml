@@ -14,12 +14,11 @@ phases:
     commands:
       - echo Copying deployment configuration files...
       - cp appspec-backend.yml appspec.yml
-      # deploy-scripts 폴더가 복사되면서 내부의 application-start-hook.sh도 함께 이동합니다.
       - cp -r deploy-scripts scripts || true
 
 artifacts:
   files:
-    - '*.jar'         # discard-paths: yes로 인해 파일명만 찾으면 됩니다
-    - appspec.yml
-    - scripts/**/*
-  discard-paths: yes
+    - 'build/libs/*.jar'     # jar 파일 경로 유지
+    - 'appspec.yml'          # 복사된 appspec.yml을 확실하게 포함
+    - 'scripts/**/*'         # 복사된 scripts 폴더 전체 포함
+  discard-paths: yes         # 모든 파일들을 최상위 루트에 모아서 압축
