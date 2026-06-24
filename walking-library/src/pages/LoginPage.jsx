@@ -18,7 +18,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8080/users/login", {
+      const res = await fetch("http://ec2-13-212-169-246.ap-southeast-1.compute.amazonaws.com:8080/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
